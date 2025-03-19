@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charity Listing</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <div class="max-w-7xl mx-auto p-5">
+            <h1 class="text-center mb-8 text-3xl font-bold">Omise Tamboon React</h1>
+            <div v-if="loading" class="text-center p-5 text-xl">Loading charities...</div>
+            <div v-else-if="error" class="text-center p-5 text-xl text-red-700">{{ error }}</div>
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                <div v-for="charity in charities" :key="charity.id" class="border border-gray-300 rounded-lg p-4 transition duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md bg-white">
+                    <img :src="getImagePath(charity.image)" :alt="charity.name" class="w-full h-48 object-cover rounded">
+                    <h2 class="mt-3 text-lg font-medium">{{ charity.name }}</h2>
+                    <p>Currency: {{ charity.currency }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    charities: [],
+                    loading: true,
+                    error: null
+                };
+            },
+            mounted() {
+                this.fetchCharities();
+            },
+            methods: {
+                async fetchCharities() {
+                    try {
+                        const response = await fetch('http://localhost:3001/charities');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        this.charities = await response.json();
+                        this.loading = false;
+                    } catch (error) {
+                        this.error = `Failed to load charities: ${error.message}`;
+                        this.loading = false;
+                        console.error('Error fetching charities:', error);
+                    }
+                },
+                getImagePath(imageName) {
+                    return `../challenges/resources/images/${imageName}`;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
